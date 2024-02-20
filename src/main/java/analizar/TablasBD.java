@@ -28,7 +28,7 @@ public class TablasBD {
         atributosUser.add(new Atributo("tipo", "string", false,null));
         atributosUser.add(new Atributo("genero", "string", false,null));
         atributosUser.add(new Atributo("residencia_actual", "string", false,null));
-        atributosUser.add(new Atributo("email", "string", false,null));
+        atributosUser.add(new Atributo("email", "email", false,null));
         atributosUser.add(new Atributo("password", "string", false,null));
         atributosUser.add(new Atributo("url_foto", "string", false,null));
         atributosUser.add(new Atributo("sueldo", "float", true,null));
@@ -132,7 +132,7 @@ public class TablasBD {
         atributosOrden.add(new Atributo("fecha_pago", "date", true,null));
         atributosOrden.add(new Atributo("nit", "string", false,null));
         atributosOrden.add(new Atributo("razon_social", "string", false,null));
-        atributosOrden.add(new Atributo("email", "string", false,null));
+        atributosOrden.add(new Atributo("email", "email", false,null));
         atributosOrden.add(new Atributo("celular", "int", false,null));
         atributosOrden.add(new Atributo("ficha_id", "int", false,"FK"));
         atributosOrden.add(new Atributo("forma_pago_id", "int", false,"FK"));

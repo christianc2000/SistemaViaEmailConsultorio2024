@@ -12,6 +12,8 @@ import java.util.regex.*;
 import java.util.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Lexer {
 
@@ -37,213 +39,96 @@ public class Lexer {
         Matcher matcher = patronStart.matcher(input);
         int pos = -1;
         if (matcher.matches()) {//START[]
-            System.out.println("El comando '" + input + "' es un comando START válido.");
             comando.accion = "START";
         } else if (patronHelp.matcher(input).matches()) {//HELP[]
-            System.out.println("El comando '" + input + "' es un comando HELP válido.");
             comando.accion = "HELP";
         } else if (patronList.matcher(input).matches()) {//LIST[table]
-            System.out.println("El comando '" + input + "' es un comando LIST válido.");
-            comando.accion="LIST";
+            comando.accion = "LIST";
             //analizar tabla
             String context = input.substring(input.indexOf("[") + 1, input.indexOf("]"));
             String tabla = getTable(context); //obtiene el campo tabla del input
-            System.out.println("Tabla: " + tabla);
             pos = analizarTabla(tabla); //analiza si la tabla es valida
             if (pos > -1) {//la tabla existe
                 comando.tabla = tabla;
-                System.out.println("tabla " + tabla + " si existe");
             } else {
                 comando.error = "Error: Tabla no existe";
-                System.out.println("tabla " + tabla + " no existe");
             }
         } else if (patronListAttributes.matcher(input).matches()) {//LIST[table:atr1,atr2,....]
-            System.out.println("El comando '" + input + "' es un comando LIST con atributos válido.");
-            comando.accion="LISTATRI";
+            comando.accion = "LISTATRI";
             //analizar tabla
             String context = input.substring(input.indexOf("[") + 1, input.indexOf("]"));
             String tabla = getTable(context); //obtiene el campo tabla del input
-            System.out.println("Tabla: " + tabla);
             pos = analizarTabla(tabla); //analiza si la tabla es valida
             if (pos > -1) {//la tabla existe
                 comando.tabla = tabla;
-                System.out.println("tabla " + tabla + " si existe");
                 //analizar atributo
                 ArrayList<String> atributos = getAtributos(context);
                 boolean succes = analizarAtributos(atributos, pos);
-                System.out.println("succes: " + succes);
                 boolean repetidos = atributosRepetidos(atributos);
-                System.out.println("repetidos: " + repetidos);
                 if (succes) {
                     if (!repetidos) {
-                        System.out.println("ingresa a repetidos");
                         comando.atributos = arrayListToMap(atributos);
-                        System.out.println("atributos: " + comando.atributos);
                     } else {
                         comando.error = "Error: Atributos repetidos";
-                        System.out.println("Error atributos repetidos");
                     }
                 } else {
                     comando.error = "Error: Atributos incorrecto";
-                    System.out.println("Error atributos incorrectos");
                 }
-                System.out.println("cantidad de atributos: " + atributos.size());
             } else {
                 comando.error = "Error: Tabla no existe";
-                System.out.println("tabla " + tabla + " no existe");
             }
         } else if (patronInsert.matcher(input).matches()) {
-            System.out.println("El comando '" + input + "' es un comando INSERT válido.");
-            comando.accion="INSERT";
-            //Analizar tabla
-            String context = input.substring(input.indexOf("[") + 1, input.indexOf("]"));
-            String tabla = getTable(context); //obtiene el campo tabla del input
-            System.out.println("Tabla: " + tabla);
-            pos = analizarTabla(tabla); //analiza si la tabla es valida
-            if (pos > -1) {//la tabla existe
-                comando.tabla = tabla;
-                System.out.println("tabla " + tabla + " si existe");
-                //analizar atributo
-                ArrayList<String[]> atributos = getAtributosValor(context);
-                boolean succes = analizarAtributoValor(atributos, pos, "I");
-                System.out.println("succes: " + succes);
-                boolean repetidos = atributosRepetidosValor(atributos);
-                System.out.println("repetidos: " + repetidos);
-                if (succes) {
-                    if (!repetidos) {
-                        Map<String, Object> atri = arrayListToMapValor(atributos);
-                        String errores = analizarTipoDato(atri, pos);
-                        if (errores.length() == 0) {
-                            comando.atributos = atri;
-                        } else {
-                            comando.error = "Error\n" + errores;
-                        }
-                    } else {
-                        comando.error = "Error: Atributos repetidos";
-                    }
-                } else {
-                    comando.error = "Error: Atributos incorrecto";
-                }
-            } else {
-                comando.error = "Error: Tabla no existe";
-                System.out.println("tabla " + tabla + " no existe");
-            }
+            comando = procesarComando(input, "INSERT");
         } else if (patronUpdate.matcher(input).matches()) {
-            System.out.println("El comando '" + input + "' es un comando UPDATE válido.");
-            comando.accion="UPDATE";
-            //analizar tabla
-            String context = input.substring(input.indexOf("[") + 1, input.indexOf("]"));
-            String tabla = getTable(context); //obtiene el campo tabla del input
-            System.out.println("Tabla: " + tabla);
-            pos = analizarTabla(tabla); //analiza si la tabla es valida
-            if (pos > -1) {//la tabla existe
-                comando.tabla = tabla;
-                System.out.println("tabla " + tabla + " si existe");
-                //analizar atributo
-                ArrayList<String[]> atributos = getAtributosValor(context);
-                boolean succes = analizarAtributoValor(atributos, pos, "U");
-                System.out.println("succes: " + succes);
-                boolean repetidos = atributosRepetidosValor(atributos);
-                System.out.println("repetidos: " + repetidos);
-                if (succes) {
-                    if (!repetidos) {
-                        Map<String, Object> atri = arrayListToMapValor(atributos);
-                        String errores = analizarTipoDato(atri, pos);
-                        if (errores.length() == 0) {
-                            comando.atributos = atri;
-                        } else {
-                            comando.error = "Error\n" + errores;
-                        }
-                    } else {
-                        comando.error = "Error: Atributos repetidos";
-                    }
-                } else {
-                    comando.error = "Error: Atributos incorrecto";
-                }
-            } else {
-                comando.error = "Error: Tabla no existe";
-                System.out.println("tabla " + tabla + " no existe");
-            }
+            comando = procesarComando(input, "UPDATE");
         } else if (patronShow.matcher(input).matches()) {
-            System.out.println("El comando '" + input + "' es un comando SHOW válido.");
-            comando.accion="SHOW";
-            //analizar tabla
-            String context = input.substring(input.indexOf("[") + 1, input.indexOf("]"));
-            String tabla = getTable(context); //obtiene el campo tabla del input
-            System.out.println("Tabla: " + tabla);
-            pos = analizarTabla(tabla); //analiza si la tabla es valida
-            if (pos > -1) {//la tabla existe
-                comando.tabla = tabla;
-                System.out.println("tabla " + tabla + " si existe");
-                //analizar atributo
-                ArrayList<String[]> atributos = getAtributosValor(context);
-                boolean succes = analizarAtributoValor(atributos, pos, "S");
-                System.out.println("succes: " + succes);
-                boolean repetidos = atributosRepetidosValor(atributos);
-                System.out.println("repetidos: " + repetidos);
-                if (succes) {
-                    if (!repetidos) {
-                        Map<String, Object> atri = arrayListToMapValor(atributos);
-                        String errores = analizarTipoDato(atri, pos);
-                        if (errores.length() == 0) {
-                            comando.atributos = atri;
-                        } else {
-                            comando.error = "Error\n" + errores;
-                        }
-                    } else {
-                        comando.error = "Error: Atributos repetidos";
-                    }
-                } else {
-                    comando.error = "Error: Atributos incorrecto";
-                }
-                System.out.println("cantidad de atributos: " + atributos.size());
-            } else {
-                comando.error = "Error: Tabla no existe";
-                System.out.println("tabla " + tabla + " no existe");
-            }
+            comando = procesarComando(input, "SHOW");
         } else if (patronDelete.matcher(input).matches()) {
-            System.out.println("El comando '" + input + "' es un comando DELETE válido.");
-            comando.accion="DELETE";
-            //analizar tabla
-            String context = input.substring(input.indexOf("[") + 1, input.indexOf("]"));
-            String tabla = getTable(context); //obtiene el campo tabla del input
-            System.out.println("Tabla: " + tabla);
-            pos = analizarTabla(tabla); //analiza si la tabla es valida
-            if (pos > -1) {//la tabla existe
-                comando.tabla = tabla;
-                System.out.println("tabla " + tabla + " si existe");
-                //analizar atributo
-                ArrayList<String[]> atributos = getAtributosValor(context);
-                boolean succes = analizarAtributoValor(atributos, pos, "D");
-                System.out.println("succes: " + succes);
-                boolean repetidos = atributosRepetidosValor(atributos);
-                System.out.println("repetidos: " + repetidos);
-                if (succes) {
-                    if (!repetidos) {
-                        Map<String, Object> atri = arrayListToMapValor(atributos);
-                        String errores = analizarTipoDato(atri, pos);
-                        if (errores.length() == 0) {
-                            comando.atributos = atri;
-                        } else {
-                            comando.error = "Error\n" + errores;
-                        }
-                    } else {
-                        comando.error = "Error: Atributos repetidos";
-                    }
-                } else {
-                    comando.error = "Error: Atributos incorrecto";
-                }
-            } else {
-                comando.error = "Error: Tabla no existe";
-                System.out.println("tabla " + tabla + " no existe");
-            }
+            comando = procesarComando(input, "DELETE");
         } else {
-            System.out.println("El comando '" + input + "' no coincide con ninguna sintaxis válida.");
+            comando.error = "Error: el comando '" + input + "' no coincide con ninguna sintaxis válida. Puede ver todos los comandos presionando HELP[];";
         }
 
         return comando;
     }
 //****************************************************************************************************************************************
+
+    public Command procesarComando(String input, String accion) {
+        Command comando = new Command(null, null, null, null);
+        int pos = -1;
+        comando.accion = accion;
+        // Analizar tabla
+        String context = input.substring(input.indexOf("[") + 1, input.indexOf("]"));
+        String tabla = getTable(context); // obtiene el campo tabla del input
+        pos = analizarTabla(tabla); // analiza si la tabla es valida
+        if (pos > -1) { // la tabla existe
+            comando.tabla = tabla;
+            // analizar atributo
+            ArrayList<String[]> atributos = getAtributosValor(context);
+            boolean succes = analizarAtributoValor(atributos, pos, accion.equals("INSERT") ? "I" : "U");
+            boolean repetidos = atributosRepetidosValor(atributos);
+            if (succes) {
+                if (!repetidos) {
+                    Map<String, Object> atri = arrayListToMapValor(atributos);
+                    String errores = analizarTipoDato(atri, pos);
+                    atri = convertirTipoDato(atri, pos);
+                    if (errores.length() == 0) {
+
+                        comando.atributos = atri;
+                    } else {
+                        comando.error = "Error\n" + errores;
+                    }
+                } else {
+                    comando.error = "Error: Atributos repetidos";
+                }
+            } else {
+                comando.error = "Error: Atributos incorrecto";
+            }
+        } else {
+            comando.error = "Error: Tabla no existe";
+        }
+        return comando;
+    }
 
     public int analizarTabla(String inputTable) {
         for (int i = 0; i < tablasBD.tablas.size(); i++) {
@@ -376,32 +261,99 @@ public class Lexer {
         return errores;
     }
 
+    public Map<String, Object> convertirTipoDato(Map<String, Object> atributoValor, int posTabla) {
+        Tabla tabla = tablasBD.tablas.get(posTabla);
+        ArrayList<Atributo> atributos = tabla.atributos;
+        ArrayList<String> keys = new ArrayList<>(atributoValor.keySet());
+        String errores = "";
+        for (Atributo atributo : atributos) {
+            for (int i = 0; i < keys.size(); i++) {
+                if (atributo.nombre.equals(keys.get(i))) {
+                    try {
+                        Object newValor = convertirTD(atributoValor.get(keys.get(i)).toString(), atributo.tipoDato);
+                        atributoValor.put(keys.get(i), newValor);  // Actualiza el valor en el mapa
+                    } catch (ParseException ex) {
+                        Logger.getLogger(Lexer.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }
+        return atributoValor;
+
+    }
+
+    public Object convertirTD(String dato, String tipoDato) throws ParseException {
+        switch (tipoDato) {
+            case "string":
+                return dato;
+            case "email":
+                if (dato.matches("^[\\w-]+(\\.[\\w-]+)*@[\\w-]+(\\.[\\w-]+)*(\\.[a-zA-Z]{2,})$")) {
+                    return dato;
+                } else {
+                    throw new IllegalArgumentException("El valor no es un email válido: " + dato);
+                }
+            case "int":
+                return Integer.valueOf(dato);
+            case "float":
+                return Float.valueOf(dato);
+            case "double":
+                return Double.valueOf(dato);
+            case "boolean":
+                if (dato.equalsIgnoreCase("true") || dato.equalsIgnoreCase("false")) {
+                    return Boolean.valueOf(dato);
+                } else {
+                    throw new IllegalArgumentException("El valor no es un booleano válido: " + dato);
+                }
+            case "date":
+                return dato;
+            case "time":
+                return dato;
+            case "datetime":
+                return dato;
+            default:
+                throw new IllegalArgumentException("Tipo de dato no válido: " + tipoDato);
+        }
+    }
+
     public String esTipoDato(String dato, String tipoDato) {
         try {
             switch (tipoDato) {
                 case "string":
+                    System.out.println(dato + " es " + tipoDato);
                     return "";
+                case "email":
+                    System.out.println(dato + " es " + tipoDato);
+                    if (dato.matches("^[\\w-]+(\\.[\\w-]+)*@[\\w-]+(\\.[\\w-]+)*(\\.[a-zA-Z]{2,})$")) {
+                        return "";
+                    }
                 case "int":
+                    System.out.println(dato + " es " + tipoDato);
                     Integer.valueOf(dato);
                     return "";
                 case "float":
+                    System.out.println(dato + " es " + tipoDato);
                     Float.valueOf(dato);
                     return "";
                 case "double":
+                    System.out.println(dato + " es " + tipoDato);
                     Double.valueOf(dato);
                     return "";
                 case "boolean":
+                    System.out.println(dato + " es " + tipoDato);
                     if (dato.equalsIgnoreCase("true") || dato.equalsIgnoreCase("false")) {
                         return "";
                     }
                     break;
                 case "date":
+                    System.out.println(dato + " es " + tipoDato);
                     new SimpleDateFormat("yyyy-MM-dd").parse(dato);
                     return "";
                 case "time":
+                    System.out.println(dato + " es " + tipoDato);
                     new SimpleDateFormat("HH:mm:ss").parse(dato);
                     return "";
                 case "datetime":
+                    System.out.println(dato + " es " + tipoDato);
                     new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(dato);
                     return "";
                 default:
@@ -436,6 +388,11 @@ public class Lexer {
             }
         }
         atributo.add(dato);
+        System.out.println("atributos orden de guardado en getAtributos del LISTATRI");
+        for (int i = 0; i < atributo.size(); i++) {
+            System.out.print(", " + atributo.get(i));
+        }
+        System.out.println("");
         return atributo;
     }
 
@@ -456,7 +413,7 @@ public class Lexer {
     }
 
     public Map<String, Object> arrayListToMap(ArrayList<String> atributos) {
-        Map<String, Object> atributo = new HashMap<>();
+        Map<String, Object> atributo = new LinkedHashMap<>();
         for (int i = 0; i < atributos.size(); i++) {
             atributo.put(atributos.get(i), null);
         }
@@ -497,10 +454,55 @@ public class Lexer {
     }
 
     public Map<String, Object> arrayListToMapValor(ArrayList<String[]> atributos) {
-        Map<String, Object> atributo = new HashMap<>();
+        Map<String, Object> atributo = new LinkedHashMap<>();
         for (int i = 0; i < atributos.size(); i++) {
             atributo.put(atributos.get(i)[0], atributos.get(i)[1]);
         }
         return atributo;
+    }
+
+    public Object convertToTipoDato(String key, String dato, int pos) {
+        System.out.println("convertir de la key: " + key + " el dato: " + dato);
+        Tabla tabla = tablasBD.tablas.get(pos);
+        ArrayList<Atributo> atributosBD = tabla.atributos;
+        for (int i = 0; i < atributosBD.size(); i++) {
+            if (atributosBD.get(i).nombre.equals(key)) {
+                try {
+                    switch (atributosBD.get(i).tipoDato) {
+                        case "string":
+                            return dato;
+                        case "email":
+                            return dato;
+                        case "int":
+                            return Integer.valueOf(dato);
+                        case "float":
+                            return Float.valueOf(dato);
+                        case "double":
+                            return Double.valueOf(dato);
+                        case "boolean":
+                            if (dato.equalsIgnoreCase("true")) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        case "date":
+                            System.out.println("intenta convertir en date el " + dato);
+                            Date date = new SimpleDateFormat("yyyy-MM-dd").parse(dato);
+                            String formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
+                            System.out.println("Fecha formateada: " + formattedDate);
+                            return formattedDate;
+                        case "time":
+                            return new SimpleDateFormat("HH:mm:ss").parse(dato);
+                        case "datetime":
+                            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(dato);
+                        default:
+                            throw new AssertionError();
+                    }
+                } catch (NumberFormatException | ParseException e) {
+                    return dato;
+                }
+            }
+        }
+        return dato;
     }
 }

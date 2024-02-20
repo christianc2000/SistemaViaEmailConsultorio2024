@@ -7,6 +7,8 @@ package com.mycompany.sistemviaemailconsultorio;
 import analizar.Command;
 import analizar.Lexer;
 import java.util.List;
+import io.github.cdimascio.dotenv.Dotenv;
+import manejadorMensaje.ManejadorPOP3;
 
 /**
  *
@@ -20,12 +22,12 @@ public class SistemViaEmailConsultorio {
         //String input="HELP[];";
         //String input="LIST[users];";
         //String input="LIST[users:id,ci,name];";
-        String input = "INSERT[users:ci=9821736,name=Christian Celso,lastname=Mamani Soliz,birth_date=2000-01-04,genero=M,celular=77376902,tipo=M,residencia_actual=Santa Cruz,sueldo=4000,email=chrstncelso@gmail.com,password=9821736,url_foto=fotografia.png];";
+        //String input = "INSERT[users:ci=9821736,name=Christian Celso,lastname=Mamani Soliz,birth_date=2000-01-04,genero=M,celular=77376902,tipo=M,residencia_actual=Santa Cruz,sueldo=4000,email=chrstncelso@gmail.com,password=9821736,url_foto=fotografia.png];";
         //String input = "UPDATE[users:id=1,birth_date=2000-01-04,genero=M,celular=77376902,tipo=M,residencia_actual=Santa Cruz,email=chrstncelso@gmail.com,password=9821736,url_foto=fotografia.png];";
         //String input="INSERT[dias:nombre=Sabadingo];";
-        //String input="SHOW[dias:id=1];";
+        // String input="SHOW[dia:id=1];";
         //String input = "DELETE[dias:id=1];";
-        Lexer sintaxis = new Lexer();
+        /*Lexer sintaxis = new Lexer();
         Command comando = sintaxis.lex(input);
         if (comando.error!=null) {
             System.out.println("Errores\n");
@@ -34,8 +36,14 @@ public class SistemViaEmailConsultorio {
             System.out.println("Acción: " + comando.accion);
             System.out.println("Tabla: " + comando.tabla);
             System.out.println("Atributos: " + comando.atributos);
-        }
-
+        }*/
+        Dotenv dotenv = Dotenv.load();
+        String host = dotenv.get("MAIL_HOST");
+        String user = dotenv.get("MAIL_USER");
+        String pass = dotenv.get("MAIL_PASS");
+        String port = "110";
+        ManejadorPOP3 manejadorPOP3 = new ManejadorPOP3(host, user, pass, port);
+        manejadorPOP3.startCheckingMail();
         /*System.out.println("Cantidad de tokens encontrados: " + tokens.size());
         for (int i = 0; i < tokens.size(); i++) {
             System.out.println("Tipo: " + tokens.get(i).getType());
