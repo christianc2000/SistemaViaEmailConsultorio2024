@@ -9,12 +9,22 @@ package manejadorMensaje;
  * @author Christian
  */
 public class ResponseBD {
+    private String title;
     private String[][] data;
     private String error;
     
-    public ResponseBD(String data[][], String error){
+    public ResponseBD(String title, String data[][], String error){
         this.data=data;
         this.error=error;
+        this.title=title;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String[][] getData() {

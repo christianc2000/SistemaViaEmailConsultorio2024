@@ -29,7 +29,7 @@ public class UserDAO {
 
     public ResponseBD list() {
         Connection conn = null;
-        ResponseBD response = new ResponseBD(null, null);
+        ResponseBD response = new ResponseBD(null, null, null);
         try {
             conn = db.establecerConexion();
             String sql = "SELECT * FROM users";
@@ -61,6 +61,7 @@ public class UserDAO {
             for (int i = 0; i < users.size(); i++) {
                 usersArray[i] = users.get(i);
             }
+            response.setTitle("User");
             response.setData(usersArray);
         } catch (SQLException e) {
             response.setError(e.getMessage());
@@ -135,7 +136,7 @@ public class UserDAO {
 
     public ResponseBD listAtri(Map<String, Object> atributos) {
         Connection conn = null;
-        ResponseBD response = new ResponseBD(null, null);
+        ResponseBD response = new ResponseBD(null, null, null);
         try {
             conn = db.establecerConexion();
             String atributosString = atributosToString(atributos);
@@ -171,6 +172,7 @@ public class UserDAO {
             for (i = 0; i < users.size(); i++) {
                 usersArray[i] = users.get(i);
             }
+            response.setTitle("User");
             response.setData(usersArray);
         } catch (SQLException e) {
             response.setError(e.getMessage());
@@ -183,7 +185,7 @@ public class UserDAO {
     }
 
     public ResponseBD create(Map<String, Object> atributos) {
-        ResponseBD response = new ResponseBD(null, null);
+        ResponseBD response = new ResponseBD(null, null, null);
         try {
             Connection conn = db.establecerConexion();
             String atributosString[] = valoresToString(atributos);
@@ -193,7 +195,9 @@ public class UserDAO {
 
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected == 0) {
-                response.setError("No rows affected");
+                response.setError("Error al insertar el usuario");
+            } else {
+                response.setTitle("User");
             }
         } catch (SQLException e) {
             response.setError(e.getMessage());
@@ -203,33 +207,39 @@ public class UserDAO {
         return response;
     }
 
-    public String update(Map<String, Object> atributos) {
-        String result = "";
+    public ResponseBD update(Map<String, Object> atributos) {
+        ResponseBD response = new ResponseBD(null, null, null);
         try {
             Connection conn = db.establecerConexion();
             String atributosString = atributosValorToString(atributos);
             String sql = "UPDATE users SET " + atributosString + " WHERE id=" + atributos.get("id") + ";";
 
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.executeUpdate();
 
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected == 0) {
+                response.setError("Error: No se encontró el usuario con el id especificado.");
+            } else {
+                response.setTitle("User");
+            }
             db.cerrarConexion();
         } catch (SQLException e) {
             e.printStackTrace();
-            result = "Error: " + e.getMessage();
+            response.setError("Error: " + e.getMessage());
         }
-        return result;
+        return response;
     }
 
     public ResponseBD show(int id) {
         Connection conn = null;
-        ResponseBD response = new ResponseBD(null, null);
+        ResponseBD response = new ResponseBD(null, null, null);
         try {
             conn = db.establecerConexion();
             String sql = "SELECT * FROM users WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
+
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnCount = rsmd.getColumnCount();
 
@@ -248,6 +258,9 @@ public class UserDAO {
                     user[i - 1] = rs.getString(i);
                 }
                 users.add(user);
+            } else {
+                response.setError("Error: No se encontró al usuario con el id especificado.");
+                return response;
             }
 
             // Convertir la lista de arreglos a un arreglo bidimensional
@@ -255,7 +268,32 @@ public class UserDAO {
             for (int i = 0; i < users.size(); i++) {
                 usersArray[i] = users.get(i);
             }
+            response.setTitle("User");
             response.setData(usersArray);
+        } catch (SQLException e) {
+            response.setError(e.getMessage());
+        } finally {
+            if (conn != null) {
+                db.cerrarConexion();
+            }
+        }
+        return response;
+    }
+
+    public ResponseBD delete(int id) {
+        Connection conn = null;
+        ResponseBD response = new ResponseBD(null, null, null);
+        try {
+            conn = db.establecerConexion();
+            String sql = "DELETE FROM users WHERE id = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected == 0) {
+                response.setError("Error: No se encontró el usuario con el id especificado.");
+                
+            }
         } catch (SQLException e) {
             response.setError(e.getMessage());
         } finally {

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .container-title {
+                display:flex;
+                justify-content: center;
+                align-content: center;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th, td {
+                border: 1px solid black;
+                padding: 15px;
+                text-align: left;
+            }
+            th {
+                background-color: #4682B4;
+                color: white;
+            }
+            .container {
+                display: flex;
+                justify-content: space-around;
+                align-content: center;
+                padding: 20px;
+            }
+            .container-title {
+                display:flex;
+                justify-content: center;
+                align-content: center;
+            }
+            .button {
+                margin-top: 20px;
+                padding: 5px 20px;
+                font-size: 16px;
+                text-align: center;
+                cursor: pointer;
+                outline: none;
+                color: #ffffff;
+                background-color: #4682B4;
+                border: none;
+                border-radius: 15px;
+                text-decoration: none;
+                margin-bottom: 20px;
+            }
+            .button:hover{
+                background-color: #0080FF
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container-title">
+            <h1>Listar $title</h1>
+        </div>
+        <a href="mailto:grupo01sc@tecnoweb.org.bo?subject=Insertar&body=$insert" class="button">Insertar Usuario</a>
+        <a href="mailto:grupo01sc@tecnoweb.org.bo?subject=Actualizar&body=$update" class="button">Actualizar Usuario</a>
+        <a href="mailto:grupo01sc@tecnoweb.org.bo?subject=Mostrar&body=$show" class="button">Mostrar Usuario</a>
+        <a href="mailto:grupo01sc@tecnoweb.org.bo?subject=Eliminar&body=$delete" class="button">Eliminar Usuario</a>
+        <div style="margin-top: 10px">
+            <table>
+                $content
+            </table>
+        </div>
+    </body>
+
+</html>

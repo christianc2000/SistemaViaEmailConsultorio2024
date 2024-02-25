@@ -23,7 +23,8 @@ public class Lexer {
     private Pattern patronListAttributes = Pattern.compile("^LIST\\[[a-zA-Z0-9_]+:(?:[a-zA-Z0-9_]+,)*[a-zA-Z0-9_]+\\];$");
     //private Pattern patronInsert = Pattern.compile("^INSERT\\[[a-zA-Z0-9_]+:(?:[a-zA-Z0-9_]+=\\w+,)*[a-zA-Z0-9_]+=\\w+\\];$");
     //private Pattern patronInsert = Pattern.compile("^INSERT\\[[a-zA-Z0-9_]+:(?:[a-zA-Z0-9_]+=[\\w\\-\\s]+,)*[a-zA-Z0-9_]+=[\\w\\-\\s]+\\];$");
-    private Pattern patronInsert = Pattern.compile("^INSERT\\[[a-zA-Z0-9_]+:(?:[a-zA-Z0-9_]+=[\\w\\-\\s@.]+,)*[a-zA-Z0-9_]+=[\\w\\-\\s@.]+\\];$");
+    //private Pattern patronInsert = Pattern.compile("^INSERT\\[[a-zA-Z0-9_]+:(?:[a-zA-Z0-9_]+=[\\w\\-\\s@.]+,)*[a-zA-Z0-9_]+=[\\w\\-\\s@.]+\\];$");
+    private Pattern patronInsert = Pattern.compile("^INSERT\\[[a-zA-Z0-9_]+:(?:[a-zA-Z0-9_]+=[\\w\\-\\s@./:]+,)*[a-zA-Z0-9_]+=[\\w\\-\\s@./:]+\\];$");
     private Pattern patronUpdate = Pattern.compile("^UPDATE\\[[a-zA-Z0-9_]+:(?:[a-zA-Z0-9_]+=[\\w\\-\\s@.]+,)*[a-zA-Z0-9_]+=[\\w\\-\\s@.]+\\];$");
     private Pattern patronShow = Pattern.compile("^SHOW\\[[a-zA-Z0-9_]+:[a-zA-Z0-9_]+=\\w+\\];$");
     private Pattern patronDelete = Pattern.compile("^DELETE\\[[a-zA-Z0-9_]+:[a-zA-Z0-9_]+=\\w+\\];$");
@@ -82,6 +83,7 @@ public class Lexer {
         } else if (patronUpdate.matcher(input).matches()) {
             comando = procesarComando(input, "UPDATE");
         } else if (patronShow.matcher(input).matches()) {
+            System.out.println("ingresa a show");
             comando = procesarComando(input, "SHOW");
         } else if (patronDelete.matcher(input).matches()) {
             comando = procesarComando(input, "DELETE");
@@ -110,13 +112,17 @@ public class Lexer {
             if (succes) {
                 if (!repetidos) {
                     Map<String, Object> atri = arrayListToMapValor(atributos);
+                    System.out.println("analizar TIPO DE DATOS");
                     String errores = analizarTipoDato(atri, pos);
-                    atri = convertirTipoDato(atri, pos);
-                    if (errores.length() == 0) {
+                    System.out.println("convertir a TIPO DE DATOS");
 
+                    if (errores.length() == 0) {
+                        atri = convertirTipoDato(atri, pos);
                         comando.atributos = atri;
                     } else {
-                        comando.error = "Error\n" + errores;
+                        comando.error = errores;
+                        System.out.println("************************DESDE PROCESAR COMANDO***********************");
+
                     }
                 } else {
                     comando.error = "Error: Atributos repetidos";
@@ -250,7 +256,9 @@ public class Lexer {
                     String error = esTipoDato(atributoValor.get(keys.get(i)).toString(), atributo.tipoDato);
                     if (error.length() > 0) {
                         errores = errores + error + "\n";
+                        //System.out.println(errores);
                     } else {
+                        System.out.println("No hay error");
                         keys.remove(i);
                         break;
                     }
@@ -319,48 +327,49 @@ public class Lexer {
         try {
             switch (tipoDato) {
                 case "string":
-                    System.out.println(dato + " es " + tipoDato);
+                    //System.out.println(dato + " es " + tipoDato);
                     return "";
                 case "email":
-                    System.out.println(dato + " es " + tipoDato);
+                    //System.out.println(dato + " es " + tipoDato);
                     if (dato.matches("^[\\w-]+(\\.[\\w-]+)*@[\\w-]+(\\.[\\w-]+)*(\\.[a-zA-Z]{2,})$")) {
                         return "";
                     }
+                    break;
                 case "int":
-                    System.out.println(dato + " es " + tipoDato);
-                    Integer.valueOf(dato);
+                    int v = Integer.valueOf(dato);
+                    //System.out.println(dato + " es " + v);
                     return "";
                 case "float":
-                    System.out.println(dato + " es " + tipoDato);
                     Float.valueOf(dato);
+                    //System.out.println(dato + " es " + tipoDato);
                     return "";
                 case "double":
-                    System.out.println(dato + " es " + tipoDato);
                     Double.valueOf(dato);
+                    //System.out.println(dato + " es " + tipoDato);
                     return "";
                 case "boolean":
-                    System.out.println(dato + " es " + tipoDato);
                     if (dato.equalsIgnoreCase("true") || dato.equalsIgnoreCase("false")) {
+                        //System.out.println(dato + " es " + tipoDato);
                         return "";
                     }
                     break;
                 case "date":
-                    System.out.println(dato + " es " + tipoDato);
                     new SimpleDateFormat("yyyy-MM-dd").parse(dato);
+                    //System.out.println(dato + " es " + tipoDato);
                     return "";
                 case "time":
-                    System.out.println(dato + " es " + tipoDato);
                     new SimpleDateFormat("HH:mm:ss").parse(dato);
+                    //System.out.println(dato + " es " + tipoDato);
                     return "";
                 case "datetime":
-                    System.out.println(dato + " es " + tipoDato);
                     new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(dato);
+                    //System.out.println(dato + " es " + tipoDato);
                     return "";
                 default:
                     throw new AssertionError();
             }
         } catch (NumberFormatException | ParseException e) {
-            return "Error: " + e.getMessage() + " debe tener el formato del tipo de dato '" + tipoDato + "'";
+            return "Error: " + e.getMessage() + ". El dato "+dato+" debe tener el formato del tipo de dato '" + tipoDato + "'.";
         }
         return "Tipo de dato no válido: " + tipoDato;
     }
