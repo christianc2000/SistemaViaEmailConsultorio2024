@@ -372,7 +372,8 @@ public class AnalisisMensajeThread extends Thread {
                                     String update = "UPDATE[users:id=number,ci=string,name=string,lastname=string,birth_date=date,genero=string,celular=number,tipo=string,residencia_actual=string,email=string,password=string,url_foto=string,sueldo=number,formacion=string,nit=string,razon_social=string]; COLOQUE TODOS LOS CAMPOS QUE REQUIERA ACTUALIZAR";
                                     String show = "SHOW[users:id=number];";
                                     String delete = "DELETE[users:id=number];";
-                                    htmlContent = succesView(htmlContent, response.getTitle(), response.getData(), insert, update, show, delete);
+                                    //htmlContent = succesView(htmlContent, response.getTitle(), response.getData(), insert, update, show, delete);
+                                    htmlContent=succesView(htmlContent, response.getTitle(), response.getData(), insert, update, show, delete);
                                     smtp.enviarCorreo(mensajeEmisor.getCorreo(), "Mostrar", htmlContent);
                                 } else {
                                     System.out.println(response.getError());
